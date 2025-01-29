@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATS Form with rrweb</title>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/rrweb@latest/dist/style.css"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    form {
+      max-width: 600px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, select, textarea, button {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .controls {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .controls button {
+      margin: 5px;
+      padding: 10px 15px;
+    }
+    #replay-container {
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      width: 600px;
+      height: 400px;
+      overflow: hidden;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>ATS Form with rrweb</h1>
+  <p>Interact with the form below, and use the controls to record and replay your actions.</p>
+
+  <!-- ATS Form -->
+  <form id="application-form">
+    <div class="form-group">
+      <label for="full-name">Full Name</label>
+      <input type="text" id="full-name" name="full-name" placeholder="Enter your full name" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" name="email" placeholder="Enter your email" required>
+    </div>
+
+    <div class="form-group">
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required>
+    </div>
+
+    <div class="form-group">
+      <label for="dob">Date of Birth</label>
+      <input type="date" id="dob" name="dob" required>
+    </div>
+
+    <div class="form-group">
+      <label for="resume">Upload Resume</label>
+      <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+    </div>
+
+    <div class="form-group">
+      <label for="position">Position Applying For</label>
+      <select id="position" name="position" required>
+        <option value="" disabled selected>Select a position</option>
+        <option value="software-engineer">Software Engineer</option>
+        <option value="product-manager">Product Manager</option>
+        <option value="designer">Designer</option>
+        <option value="data-scientist">Data Scientist</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Are you willing to relocate?</label>
+      <input type="radio" id="relocate-yes" name="relocate" value="yes" required>
+      <label for="relocate-yes">Yes</label>
+      <input type="radio" id="relocate-no" name="relocate" value="no">
+      <label for="relocate-no">No</label>
+    </div>
+
+    <div class="form-group">
+      <label>Skills (Check all that apply)</label>
+      <input type="checkbox" id="skill-html" name="skills" value="html">
+      <label for="skill-html">HTML</label>
+      <input type="checkbox" id="skill-css" name="skills" value="css">
+      <label for="skill-css">CSS</label>
+      <input type="checkbox" id="skill-js" name="skills" value="javascript">
+      <label for="skill-js">JavaScript</label>
+      <input type="checkbox" id="skill-python" name="skills" value="python">
+      <label for="skill-python">Python</label>
+    </div>
+
+    <div class="form-group">
+      <label for="cover-letter">Cover Letter</label>
+      <textarea id="cover-letter" name="cover-letter" rows="5" placeholder="Write a brief cover letter"></textarea>
+    </div>
+
+    <button type="submit">Submit Application</button>
+  </form>
+
+  <!-- Controls for rrweb -->
+  <div class="controls">
+    <button id="start-recording">Start Recording</button>
+    <button id="stop-recording" disabled>Stop Recording</button>
+    <button id="replay-recording" disabled>Replay Recording</button>
+  </div>
+
+  <!-- Replay container -->
+  <div id="replay-container"></div>
+
+  <script>
+    let events = [];
+    let stopFn;
+
+    // Start Recording
+    document.getElementById('start-recording').addEventListener('click', () => {
+      events = []; // Clear previous events
+      stopFn = rrweb.record({
+        emit(event) {
+          events.push(event);
+        },
+      });
+      console.log('Recording started');
+      document.getElementById('start-recording').disabled = true;
+      document.getElementById('stop-recording').disabled = false;
+    });
+
+    // Stop Recording
+    document.getElementById('stop-recording').addEventListener('click', () => {
+      if (stopFn) stopFn();
+      console.log('Recording stopped. Events:', events);
+      document.getElementById('stop-recording').disabled = true;
+      document.getElementById('replay-recording').disabled = false;
+    });
+
+    // Replay Recording
+    document.getElementById('replay-recording').addEventListener('click', () => {
+      if (events.length > 0) {
+        const container = document.getElementById('replay-container');
+        container.innerHTML = ''; // Clear previous replay
+        const replayer = new rrweb.Replayer(events, { root: container });
+        replayer.play();
+        console.log('Replaying events');
+      } else {
+        console.warn('No recorded events to replay');
+      }
+    });
+
+    // Form Submission
+    document.getElementById('application-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Application submitted successfully!');
+    });
+  </script>
+</body>
+</html>

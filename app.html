@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phoenix Channel with Vue 3</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/phoenix@1.7.0/priv/static/phoenix.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #app {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      background: #f4f4f4;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    input, button {
+      padding: 10px;
+      margin-top: 10px;
+    }
+    button {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>Phoenix Channel + Vue 3</h1>
+    <ul>
+      <li v-for="(message, index) in messages" :key="index">{{ message }}</li>
+    </ul>
+    <input type="text" v-model="newMessage" placeholder="Type a message" />
+    <button @click="sendMessage">Send</button>
+  </div>
+
+  <script>
+    // Vue 3 App
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          messages: [],
+          newMessage: "",
+          channel: null,
+        };
+      },
+      methods: {
+        sendMessage() {
+          if (this.newMessage.trim() === "") return;
+          this.channel.push("shout", { message: this.newMessage });
+          this.newMessage = "";
+        },
+      },
+      mounted() {
+        // Connect to Phoenix Channel
+        const socket = new Phoenix.Socket("ws://localhost:4000/socket");
+        socket.connect();
+
+        this.channel = socket.channel("hello:lobby", {});
+
+        this.channel
+          .join()
+          .receive("ok", () => console.log("Joined channel"))
+          .receive("error", (resp) => console.error("Failed to join", resp));
+
+        this.channel.on("shout", (payload) => {
+          this.messages.push(payload.message);
+        });
+      },
+    }).mount("#app");
+  </script>
+</body>
+</html>
