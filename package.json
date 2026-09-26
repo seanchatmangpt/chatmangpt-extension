@@ -2,7 +2,7 @@
   "dependencies": {
     "marked": "^15.0.4",
     "notivue": "^2.4.5",
-    "phoenix": "^1.7.18",
+    "phoenix": "^1.8.9",
     "pinia": "^2.3.0",
     "vue": "^3.5.13",
     "vue-i18n": "^11.0.1",
